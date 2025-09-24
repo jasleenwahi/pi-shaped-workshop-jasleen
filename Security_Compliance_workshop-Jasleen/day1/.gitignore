@@ -1,0 +1,6 @@
+demo/.idea/
+demo/.mvn/
+demo/.gitattributes
+demo/mvnw
+demo/mvn.cmd
+demo/target/
