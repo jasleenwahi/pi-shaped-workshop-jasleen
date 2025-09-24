@@ -1,6 +1,6 @@
-demo/.idea/
-demo/.mvn/
-demo/.gitattributes
-demo/mvnw
-demo/mvn.cmd
-demo/target/
+sample-app/.idea/
+sample-app/.mvn/
+sample-app/.gitattributes
+sample-app/mvnw
+sample-app/mvn.cmd
+sample-app/target/
