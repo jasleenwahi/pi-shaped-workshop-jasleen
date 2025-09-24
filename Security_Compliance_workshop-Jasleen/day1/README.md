@@ -20,11 +20,6 @@ It detects for any secret leaks in staged files and commit history.
 - Generated the report using the following command.
 > gitleaks detect --report-path=gitleaks-report.json --report-format=json
 
-- By default, Gitleaks uses its built-in rules (for AWS keys, GitHub tokens, Azure Storage keys, etc.).
-- Created a **gitleaks.toml** file to scan **spring.datasource.password** because gitleaks doesn't scan it by default.
-- Re-scanned after, by running this command:
-> gitleaks detect --config gitleaks.toml
-
 ### Steps to remove secrets
 - Install git-filter-repo using following command:
 > sudo apt install git-filter-repo
