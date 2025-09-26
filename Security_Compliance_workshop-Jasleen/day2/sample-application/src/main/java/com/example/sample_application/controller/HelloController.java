@@ -12,12 +12,13 @@ import java.sql.Statement;
 @RestController
 public class HelloController {
 
+    // Vulnerable: password is hardcoded
     private static final String USERNAME = "admin";
     private static final String PASSWORD = "password";
 
     @GetMapping("/user")
     public String getUser(@RequestParam String username) throws Exception {
-        // ⚠️ Vulnerable: direct concatenation of user input into SQL query
+        // Vulnerable: direct concatenation of user input into SQL query
         Connection conn = DriverManager.getConnection("jdbc:h2:mem:testdb", "sa", "");
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(
