@@ -50,7 +50,7 @@ jobs:
       - name: Create ZAP workspace
         run: |
           mkdir -p zap-workspace
-          chmod 755 zap-workspace
+          chmod 777 zap-workspace
 
       - name: Run OWASP ZAP baseline scan
         run: |
