@@ -1,9 +1,16 @@
 name: OWASP ZAP Security Scan
 
 on:
-  push: {}
-  pull_request: {}
-
+  push:
+    branches:
+      - main
+    paths:
+      - 'Security_Compliance_workshop-Jasleen/day-2/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Security_Compliance_workshop-Jasleen/day-2/**'
 jobs:
   build-and-scan:
     runs-on: ubuntu-latest
