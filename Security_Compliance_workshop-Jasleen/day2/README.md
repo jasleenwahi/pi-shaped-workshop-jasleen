@@ -82,5 +82,5 @@ It’s like fixing a leaky pipe as soon as you see a drip, not after the house f
 
 **How ZAP Helps**: By adding ZAP scans to the CI/CD pipeline (e.g., on every push to main), we catch security issues early—while coding or testing—rather than after deployment. 
 This saves time and money, as fixing bugs later is harder and costlier.
-Benefits: Developers get instant feedback (e.g., 8 warnings in our scan), can fix problems before release, and build a habit of secure coding. 
+Benefits: Developers get instant feedback (e.g., 8 warnings in our scan), can fix problems before release, and build a habit of secure coding.
 It’s like having a safety net that catches issues before they reach users!
