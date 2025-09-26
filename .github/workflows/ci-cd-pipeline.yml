@@ -26,23 +26,27 @@ jobs:
           distribution: 'temurin'
 
       - name: Build application
-        run: |
-          cd Security_Compliance_workshop-Jasleen/day2/sample-application
-          ./gradlew clean build
+        run: ./gradlew clean build
+        working-directory: Security_Compliance_workshop-Jasleen/day2/sample-application
 
       - name: Start Spring Boot app
         run: |
           nohup java -jar build/libs/*.jar &
-          sleep 20
+          echo "Waiting for Spring Boot to start..."
+          for i in {1..30}; do
+            curl -s http://localhost:8080/actuator/health && break
+            sleep 2
+          done
+        working-directory: Security_Compliance_workshop-Jasleen/day2/sample-application
 
       - name: Run OWASP ZAP baseline scan
         uses: zaproxy/action-baseline@v0.9.0
         with:
           target: 'http://localhost:8080'
-          cmd_options: '-r zap-report.html'
+          cmd_options: '-r Security_Compliance_workshop-Jasleen/day2/sample-application/zap-report.html'
 
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: zap-report.html
+          path: Security_Compliance_workshop-Jasleen/day2/sample-application/zap-report.html
