@@ -16,6 +16,11 @@ public class HelloController {
     private static final String USERNAME = "admin";
     private static final String PASSWORD = "password";
 
+    @GetMapping("/")
+    public String hello() {
+        return "Hello, world!";
+    }
+
     @GetMapping("/user")
     public String getUser(@RequestParam String username) throws Exception {
         // Vulnerable: direct concatenation of user input into SQL query
