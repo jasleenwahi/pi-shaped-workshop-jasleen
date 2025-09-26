@@ -1,43 +1,27 @@
 ### 2 OWASP Top 10 vulnerabilities, their impact and fix
 
-1. **A03:2021 – Injection (SQL Injection)**
+1. **Insufficient Site Isolation Against Spectre Vulnerability**
 - Impact
-  - Attackers can have access to sensitive information
-  - Data can easily be deleted or modified
-  - Authentication can be bypassed and any user can be returned.
-
-```
-Connection conn = DriverManager.getConnection("jdbc:h2:mem:testdb", "sa", ""); 
-Statement stmt = conn.createStatement(); 
-ResultSet rs = stmt.executeQuery(
-"SELECT * FROM users WHERE username = '" + username + "'"); 
-```
-
-> **An attacker can send username = ' OR '1'='1 (or other payloads) and change the query semantics, e.g. returning every user or worse.**
+  - Sensitive information like, Passwords stored in memory, Authentication tokens or cookies, Form inputs or personal data
+  - Can be exfiltrated by a malicious website running in the same browser session.
+  - This is primarily a client-side vulnerability, so it doesn’t directly compromise your server code, but your users’ data could be at risk.
 
 - Fix
-  -  Using JPA removes most raw SQL concatenation risks if you use parameter binding or repository methods:
+  - Enable strict site isolation in browsers
+    - For Chrome: Go to chrome://flags/#site-isolation-trial-opt-in or enable “Strict Site Isolation” in settings.
+  - Keep browsers and operating systems up-to-date
+    - Vendors regularly release patches to mitigate Spectre/Meltdown vulnerabilities.
+  
 
-````
- public interface UserRepository extends JpaRepository<UserEntity, Long> {
-       Optional<UserEntity> findByUsername(String username);
- }
-````
-> **Then call userRepository.findByUsername(username). The framework handles parameter binding.**
-
-2. **A07:2021 – Identification & Authentication Failures**
+2. **Vulnerability: X-Content-Type-Options Header Missing**
 - Impact
-  - Attacker can easily hack your account if passwords are hardcoded
-  - They can access sensitive endpoints
-
-```
-    private static final String USERNAME = "admin";
-    private static final String PASSWORD = "password";
-```
-> **An attacker can have access to a sensitive endpoint using this password **
+  - Malicious content could execute in the user’s browser.
+  - Attackers could trick users into executing malicious scripts by serving files with the wrong MIME type.
+  - If scripts execute unexpectedly, sensitive data might be exposed.
 
 - Fix
-  - Remove hardcoded credentials — never store secrets in source code. Use environment variables or a secrets manager (Vault, AWS Secrets Manager, GitHub/GitLab secrets).
+  - Add the X-Content-Type-Options header to all HTTP responses. 
+  - Recommended value: nosniff
 
 ### What is the purpose of DAST and how does it complement other security testing methods?
 DAST, or Dynamic Application Security Testing, is like a security guard that checks your app while it’s running. 
