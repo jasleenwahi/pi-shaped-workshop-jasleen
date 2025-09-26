@@ -1,8 +1,8 @@
 name: OWASP ZAP Security Scan
 
 on:
-  push:
-  pull_request:
+  push: {}
+  pull_request: {}
 
 jobs:
   build-and-scan:
@@ -24,7 +24,6 @@ jobs:
       - name: Start Spring Boot app
         run: |
           nohup java -jar build/libs/*.jar &
-          sleep 20  # wait for the server to start
 
       - name: Run OWASP ZAP baseline scan
         uses: zaproxy/action-baseline@v0.9.0
