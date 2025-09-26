@@ -30,36 +30,46 @@ jobs:
         run: ./gradlew clean build
         working-directory: Security_Compliance_workshop-Jasleen/day2/sample-application
 
-      - name: Start Spring Boot app
+      - name: Build Docker image for Spring Boot app
         run: |
-          nohup java -jar build/libs/*.jar &
+          cd Security_Compliance_workshop-Jasleen/day2/sample-application
+          docker build -t spring-app .
+
+      - name: Create Docker network
+        run: docker network create zap-net || true
+
+      - name: Start Spring Boot container
+        run: |
+          docker run -d --name spring-app --network zap-net -p 8080:8080 spring-app
           echo "Waiting for Spring Boot to start..."
           for i in {1..30}; do
-            curl -s http://localhost:8080/actuator/health && break
+            docker exec spring-app curl -s http://localhost:8080/actuator/health && break
             sleep 2
           done
-        working-directory: Security_Compliance_workshop-Jasleen/day2/sample-application
+
+      - name: Create ZAP workspace
+        run: mkdir -p zap-workspace
 
       - name: Run OWASP ZAP baseline scan
-        uses: zaproxy/action-baseline@v0.9.0
-        with:
-          target: 'http://localhost:8080'
-          cmd_options: '-r Security_Compliance_workshop-Jasleen/day2/sample-application/zap-report.html -J Security_Compliance_workshop-Jasleen/day2/sample-application/zap-report.json'
-
-      - name: Verify reports
-        run: ls -la Security_Compliance_workshop-Jasleen/day2/sample-application/
+        run: |
+          docker run --rm \
+            --network zap-net \
+            -v $(pwd)/zap-workspace:/zap/wrk \
+            -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://spring-app:8080 \
+            -r report_html.html \
+            -J report_json.json \
+            -w report_md.md || true
 
       - name: Upload ZAP Reports
         uses: actions/upload-artifact@v4
         with:
           name: zap-security-reports
-          path: |
-            Security_Compliance_workshop-Jasleen/day2/sample-application/zap-report.html
-            Security_Compliance_workshop-Jasleen/day2/sample-application/zap-report.json
+          path: zap-workspace/
           retention-days: 30
 
       - name: Display Scan Summary
         run: |
           echo "## ZAP Security Scan Completed" >> $GITHUB_STEP_SUMMARY
-          echo "📊 **Scan Results:**" >> $GITHUB_STEP_SUMMARY
-          echo "💡 **Reports available in Artifacts tab**" >> $GITHUB_STEP_SUMMARY
+          echo "📁 Reports available in Artifacts tab" >> $GITHUB_STEP_SUMMARY
