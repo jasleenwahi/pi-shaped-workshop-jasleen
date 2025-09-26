@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'Security_Compliance_workshop-Jasleen/day-2/**'
+      - 'Security_Compliance_workshop-Jasleen/day2/**'
   pull_request:
     branches:
       - main
     paths:
-      - 'Security_Compliance_workshop-Jasleen/day-2/**'
+      - 'Security_Compliance_workshop-Jasleen/day2/**'
 jobs:
   build-and-scan:
     runs-on: ubuntu-latest
