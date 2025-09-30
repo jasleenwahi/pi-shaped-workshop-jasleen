@@ -46,6 +46,48 @@ The CI/CD workflow includes the following steps:
 
 - **Display Scan Summary**
     - Adds a step summary in GitHub Actions for quick review.
+  
+
+## Two Vulnerabilities found and their recommended fix
+
+1. **A03:2021 – Injection (SQL Injection)**
+- Impact
+    - Attackers can have access to sensitive information
+    - Data can easily be deleted or modified
+    - Authentication can be bypassed and any user can be returned.
+
+```
+Connection conn = DriverManager.getConnection("jdbc:h2:mem:testdb", "sa", ""); 
+Statement stmt = conn.createStatement(); 
+ResultSet rs = stmt.executeQuery(
+"SELECT * FROM users WHERE username = '" + username + "'"); 
+```
+
+> **An attacker can send username = ' OR '1'='1 (or other payloads) and change the query semantics, e.g. returning every user or worse.**
+
+- Fix
+    -  Using JPA removes most raw SQL concatenation risks if you use parameter binding or repository methods:
+
+````
+ public interface UserRepository extends JpaRepository<UserEntity, Long> {
+       Optional<UserEntity> findByUsername(String username);
+ }
+````
+> **Then call userRepository.findByUsername(username). The framework handles parameter binding.**
+
+2. **A07:2021 – Identification & Authentication Failures**
+- Impact
+    - Attacker can easily hack your account if passwords are hardcoded
+    - They can access sensitive endpoints
+
+```
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "password";
+```
+> **An attacker can have access to a sensitive endpoint using this password **
+
+- Fix
+    - Remove hardcoded credentials — never store secrets in source code. Use environment variables or a secrets manager (Vault, AWS Secrets Manager, GitHub/GitLab secrets).
 
 ## Core Concept Questions
 
