@@ -106,8 +106,3 @@ jobs:
         run: |
             echo "## Security Scans Completed" >> $GITHUB_STEP_SUMMARY
             echo "📁 ZAP, Semgrep & Gitleaks reports available in Artifacts tab" >> $GITHUB_STEP_SUMMARY
-      - name: Display Scan Summary
-        run: |
-            echo "## Security Scans Completed" >> $GITHUB_STEP_SUMMARY
-            echo "📁 ZAP & Semgrep reports available in Artifacts tab" >> $GITHUB_STEP_SUMMARY
-      
