@@ -1,3 +1,52 @@
+## Pipeline Steps
+
+The CI/CD workflow includes the following steps:
+
+- **Checkout Repository**
+    - Uses `actions/checkout@v4` to pull the latest code.
+
+- **Set Up JDK 17**
+    - Ensures compatibility with the Spring Boot application.
+
+- **Build Application**
+    - Runs `./gradlew clean build` to compile and package the app.
+
+- **Build Docker Image**
+    - Creates a Docker image (`spring-app`) for scanning with OWASP ZAP.
+
+- **Create Docker Network**
+    - Isolates the application and OWASP ZAP scanner for network communication.
+
+- **Start Spring Boot Container**
+    - Launches the container and waits for `/actuator/health` to confirm readiness.
+
+- **Run OWASP ZAP Baseline Scan (DAST)**
+    - Performs dynamic security testing on the running app.
+    - Generates reports:
+        - `report_html.html` → human-readable
+        - `report_json.json` → machine-readable
+        - `report_md.md` → Markdown summary
+    - Reports are saved in `zap-workspace/`.
+
+- **Run Semgrep Scan (SAST & Secrets Detection)**
+    - Performs static analysis to detect:
+        - Code-level vulnerabilities
+        - Insecure patterns
+        - Hardcoded secrets
+    - Reports generated in JSON and SARIF format.
+    - Saved in `semgrep-workspace/`.
+
+- **Run Gitleaks Scan (Secrets Detection)**
+    - Scans the repository for **hardcoded secrets**.
+    - JSON report saved in `gitleaks-workspace/`.
+
+- **Upload Reports as Artifacts**
+    - All scan reports (`zap-workspace/`, `semgrep-workspace/`, `gitleaks-workspace/`) are uploaded to GitHub Actions artifacts.
+    - Artifacts are retained for 30 days.
+
+- **Display Scan Summary**
+    - Adds a step summary in GitHub Actions for quick review.
+
 ## Core Concept Questions
 
 ### What is the difference between SAST, DAST, and secrets scanning, and why should all be part of a CI/CD pipeline?
