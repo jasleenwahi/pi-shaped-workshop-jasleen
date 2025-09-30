@@ -89,6 +89,15 @@ ResultSet rs = stmt.executeQuery(
 - Fix
     - Remove hardcoded credentials — never store secrets in source code. Use environment variables or a secrets manager (Vault, AWS Secrets Manager, GitHub/GitLab secrets).
 
+## Evidence of Fixing one vulnerability
+Found a leaked secret using gitleaks
+![img.png](img.png)
+
+Removed the secret, here is the screenshot
+![img_1.png](img_1.png)
+
+here you can clearly see no leaks are being found
+
 ## Core Concept Questions
 
 ### What is the difference between SAST, DAST, and secrets scanning, and why should all be part of a CI/CD pipeline?
