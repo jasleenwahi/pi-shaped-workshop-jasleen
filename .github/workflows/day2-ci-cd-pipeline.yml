@@ -71,7 +71,23 @@ jobs:
           path: zap-workspace/
           retention-days: 30
 
+      - name: Run Semgrep scan
+        run: |
+            pip install semgrep
+            mkdir -p semgrep-workspace
+            semgrep --config=auto \
+                    --json > semgrep-workspace/semgrep-report.json || true
+            semgrep --config=auto \
+                    --sarif > semgrep-workspace/semgrep-report.sarif || true
+
+      - name: Upload Semgrep Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-security-reports
+          path: semgrep-workspace/
+          retention-days: 30
+
       - name: Display Scan Summary
         run: |
-          echo "## ZAP Security Scan Completed" >> $GITHUB_STEP_SUMMARY
-          echo "📁 Reports available in Artifacts tab" >> $GITHUB_STEP_SUMMARY
+            echo "## Security Scans Completed" >> $GITHUB_STEP_SUMMARY
+            echo "📁 ZAP & Semgrep reports available in Artifacts tab" >> $GITHUB_STEP_SUMMARY
