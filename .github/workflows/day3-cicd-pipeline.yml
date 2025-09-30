@@ -87,8 +87,27 @@ jobs:
           path: semgrep-workspace/
           retention-days: 30
 
+      - name: Run Gitleaks scan
+        run: |
+            mkdir -p gitleaks-workspace
+            docker run --rm -v $(pwd):/repo:z zricethezav/gitleaks:latest detect \
+            --path=/repo \
+            --report-format=json \
+            --report-path=/repo/gitleaks-workspace/gitleaks-report.json || true
+
+      - name: Upload Gitleaks Reports
+        uses: actions/upload-artifact@v4
+        with:
+            name: gitleaks-security-reports
+            path: gitleaks-workspace/
+            retention-days: 30
+
       - name: Display Scan Summary
         run: |
-          echo "## Security Scans Completed" >> $GITHUB_STEP_SUMMARY
-          echo "📁 ZAP & Semgrep reports available in Artifacts tab" >> $GITHUB_STEP_SUMMARY
+            echo "## Security Scans Completed" >> $GITHUB_STEP_SUMMARY
+            echo "📁 ZAP, Semgrep & Gitleaks reports available in Artifacts tab" >> $GITHUB_STEP_SUMMARY
+      - name: Display Scan Summary
+        run: |
+            echo "## Security Scans Completed" >> $GITHUB_STEP_SUMMARY
+            echo "📁 ZAP & Semgrep reports available in Artifacts tab" >> $GITHUB_STEP_SUMMARY
       
