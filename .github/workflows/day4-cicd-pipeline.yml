@@ -1,0 +1,120 @@
+name: OWASP ZAP + SEMGREP + TRIVY Security Scan
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Security_Compliance_workshop-Jasleen/day4/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Security_Compliance_workshop-Jasleen/day4/**'
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build application
+        run: ./gradlew clean build
+        working-directory: Security_Compliance_workshop-Jasleen/day2/sample-application
+
+      - name: Build Docker image for Spring Boot app
+        run: |
+          cd Security_Compliance_workshop-Jasleen/day2/sample-application
+          docker build -t spring-app .
+
+      - name: Create Docker network
+        run: docker network create zap-net || true
+
+      - name: Start Spring Boot container
+        run: |
+          docker run -d --name spring-app --network zap-net -p 8080:8080 spring-app
+          echo "Waiting for Spring Boot to start..."
+          for i in {1..30}; do
+            docker exec spring-app curl -s http://localhost:8080/actuator/health && break
+            sleep 2
+          done
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
+
+      - name: Run Trivy scan on Docker image
+        run: |
+          mkdir -p trivy-reports
+          trivy image --severity HIGH,CRITICAL --format json -o trivy-reports/trivy-image-report.json spring-app || true
+          trivy image --severity HIGH,CRITICAL --format table -o trivy-reports/trivy-image-report.txt spring-app || true
+
+      - name: Run Trivy filesystem scan
+        run: |
+          trivy fs --severity HIGH,CRITICAL --format json -o trivy-reports/trivy-fs-report.json . || true
+          trivy fs --severity HIGH,CRITICAL --format table -o trivy-reports/trivy-fs-report.txt . || true
+
+      - name: Upload Trivy Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-security-reports
+          path: trivy-reports/
+          retention-days: 30
+
+      - name: Create ZAP workspace
+        run: |
+          mkdir -p zap-workspace
+          chmod 777 zap-workspace
+
+      - name: Run OWASP ZAP baseline scan
+        run: |
+          docker run --rm \
+            --network zap-net \
+            -v $(pwd)/zap-workspace:/zap/wrk \
+            -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://spring-app:8080 \
+            -r report_html.html \
+            -J report_json.json \
+            -w report_md.md || true
+
+      - name: Upload ZAP Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-security-reports
+          path: zap-workspace/
+          retention-days: 30
+
+      - name: Run Semgrep scan
+        run: |
+          pip install semgrep
+          mkdir -p semgrep-workspace
+          semgrep --config=auto \
+                  --json > semgrep-workspace/semgrep-report.json || true
+          semgrep --config=auto \
+                  --sarif > semgrep-workspace/semgrep-report.sarif || true
+
+      - name: Upload Semgrep Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-security-reports
+          path: semgrep-workspace/
+          retention-days: 30
+
+      - name: Display Scan Summary
+        run: |
+          echo "## ✅ Security Scans Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- 📁 ZAP, Semgrep, Trivy reports are available in the Artifacts tab" >> $GITHUB_STEP_SUMMARY
