@@ -1,0 +1,22 @@
+[
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 9,
+  "EndLine": 9,
+  "StartColumn": 2,
+  "EndColumn": 96,
+  "Match": "azure.storage.account-key=REDACTED",
+  "Secret": "REDACTED",
+  "File": "src/main/resources/application.properties",
+  "SymlinkFile": "",
+  "Commit": "ebeed38cd0d51c2d85e740c7df4334f0e10c7b07",
+  "Entropy": 5.304035,
+  "Author": "vn10863",
+  "Email": "vn10863@heb.com",
+  "Date": "2025-09-23T07:16:40Z",
+  "Message": "Added a simple user controller",
+  "Tags": [],
+  "Fingerprint": "ebeed38cd0d51c2d85e740c7df4334f0e10c7b07:src/main/resources/application.properties:generic-api-key:9"
+ }
+]
